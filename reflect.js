@@ -22,6 +22,7 @@ let user = {
     }
 }
 
+<<<<<<< HEAD
 // Here are some basic methods that can be called
 // to interact with an object's properties :
 
@@ -59,6 +60,8 @@ console.log(
 // and feeds it with arguments listed in an array
 console.log("User, please introduce yourself !")
 Reflect.apply(user.sayHello, user, ['definitely ']);
+=======
+>>>>>>> removing basic functionnalities
 
 // Defines a new property for a given object
 // Last argument is an objectProperty, with assignable properties being:
@@ -71,15 +74,7 @@ console.log(
     Reflect.get(user, 'age')
 )
 
-
-
-  //-----------------------------//
- //    Here comes the fun !!    //
-//-----------------------------//
-
-
-
-// Let's set a property with a custom getter function.
+// Sets a property with a custom getter function.
 // When property will be accessed, the value it returns will
 // depend on the value of another property :
 Reflect.defineProperty(user, 'is_adult', { 
@@ -87,6 +82,7 @@ Reflect.defineProperty(user, 'is_adult', {
         return Reflect.get(this, 'age') > 17 
     }
 })
+
 // Note that as this property has been defined as a getter, even though
 // a function is called, the parenthesis shouldn't be applied,
 // both 2 syntaxes around the OR gate will produce the same result.
@@ -114,13 +110,13 @@ Reflect.defineProperty(user, 'howOldAreYou', {
 
 // Calls the function that will make user grow by one year.
 Reflect.apply(user.grow, user, []);
-
+// User's age should have been updated.
 console.log(
-    "Is now user adult after having grown ??", 
+    "Is now user adult after having grown up ??", 
     Reflect.get(user, 'is_adult'),
     '\n\n'
 )
 
 
-// And for the fun of chaining functions..!
+// And.. for the fun of chaining functions..!
 user.sayHello('no longer ').howOldAreYou().grow().howOldAreYou();
