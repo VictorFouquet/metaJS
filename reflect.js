@@ -22,46 +22,6 @@ let user = {
     }
 }
 
-<<<<<<< HEAD
-// Here are some basic methods that can be called
-// to interact with an object's properties :
-
-// Gives all the properties owned by an object
-console.log(
-    "User properties :",
-    Reflect.ownKeys(user)
-)
-
-// Gets the value of a property owned by an object
-console.log(
-    "User id :",
-    Reflect.get(user, 'id')
-)
-
-// Sets the value of a property owned by an object
-console.log(
-    "User id has been updated ?",
-    Reflect.set(user, 'id', 2)
-)
-
-// Gets the value of a property owned by an object
-console.log(
-    "Updated user id :",
-    Reflect.get(user, 'id')
-)
-
-// Checks if an object does own a given property
-console.log(
-    "Has user a name ?",
-    Reflect.has(user, 'name')
-)
-
-// Calls a function owned as property by and object
-// and feeds it with arguments listed in an array
-console.log("User, please introduce yourself !")
-Reflect.apply(user.sayHello, user, ['definitely ']);
-=======
->>>>>>> removing basic functionnalities
 
 // Defines a new property for a given object
 // Last argument is an objectProperty, with assignable properties being:
