@@ -2,15 +2,24 @@
  //    Playing with reflection !!   //
 //_________________________________//
 
-// Documentation found here :
-// https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Reflect
-// Base tutorial found here :
-// https://www.youtube.com/watch?v=X7qXJRU6qyM
+
+/* 
+
+Goal --> Dynamically asign properties and functions to an object.
+
+Documentation found here :
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Reflect
+Base tutorial found here :
+https://www.youtube.com/watch?v=X7qXJRU6qyM
+
+*/
 
 
-// Defines a user with several properties.
-// The sayHello function returns the user object
-// so that functions can further be chained.
+/*
+Defines a user with several properties.
+The sayHello function returns the user object
+so that functions can further be chained.
+*/
 let user = {
     name: 'Jon',
     id: 1,
@@ -23,36 +32,44 @@ let user = {
 }
 
 
-// Defines a new property for a given object
-// Last argument is an objectProperty, with assignable properties being:
-// [value, enumerable, configurable, writable, get, set]
-// For more details about these arguments, visit
-// https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+/*
+Defines a new property for a given object
+Last argument is an objectProperty, with assignable properties being:
+[value, enumerable, configurable, writable, get, set]
+For more details about these arguments, visit
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+*/
 Reflect.defineProperty(user, 'age', { value: 17, enumerable: false, writable: true })
 console.log(
     "Now user has an age property with value",
     Reflect.get(user, 'age')
 )
 
-// Sets a property with a custom getter function.
-// When property will be accessed, the value it returns will
-// depend on the value of another property :
+/*
+Sets a property with a custom getter function.
+When property will be accessed, the value it returns will
+depend on the value of another property :
+*/
 Reflect.defineProperty(user, 'is_adult', { 
     get: function() { 
         return Reflect.get(this, 'age') > 17 
     }
 })
 
-// Note that as this property has been defined as a getter, even though
-// a function is called, the parenthesis shouldn't be applied,
-// both 2 syntaxes around the OR gate will produce the same result.
+/*
+Note that as this property has been defined as a getter, even though
+a function is called, the parenthesis shouldn't be applied,
+both 2 syntaxes around the OR gate will produce the same result.
+*/
 console.log(
     "\nIs user adult ?",
     Reflect.get(user, 'is_adult') || user.is_adult
 );
 
-// Defines 2 properties holding a function (returning "this"
-// allows to chain user-owned functions)
+/*
+Defines 2 properties holding a function (returning "this"
+allows to chain user-owned functions)
+*/
 Reflect.defineProperty(user, 'grow', { 
     value: function() {
         console.log("I'm getting older!");
