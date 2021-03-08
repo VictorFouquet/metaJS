@@ -9,7 +9,7 @@
 
 
 // Defines a user with several properties.
-// The sayHello function returns the user
+// The sayHello function returns the user object
 // so that functions can further be chained.
 let user = {
     name: 'Jon',
@@ -22,10 +22,10 @@ let user = {
     }
 }
 
-// Here a some basic methods that can be called
+// Here are some basic methods that can be called
 // to interact with an object's properties :
 
-// Gives all the properties owned my object user
+// Gives all the properties owned by an object
 console.log(
     "User properties :",
     Reflect.ownKeys(user)
@@ -49,19 +49,19 @@ console.log(
     Reflect.get(user, 'id')
 )
 
-// Checks if an object owns a given property
+// Checks if an object does own a given property
 console.log(
     "Has user a name ?",
     Reflect.has(user, 'name')
 )
 
-// Calls a function owned as property by a given object
-// and fed with an argument
+// Calls a function owned as property by and object
+// and feeds it with arguments listed in an array
 console.log("User, please introduce yourself !")
 Reflect.apply(user.sayHello, user, ['definitely ']);
 
 // Defines a new property for a given object
-// Last argument is an objectProperty, with assignable properties
+// Last argument is an objectProperty, with assignable properties being:
 // [value, enumerable, configurable, writable, get, set]
 // For more details about these arguments, visit
 // https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
@@ -88,15 +88,15 @@ Reflect.defineProperty(user, 'is_adult', {
     }
 })
 // Note that as this property has been defined as a getter, even though
-// a function is called, the parenthesis aren't needed, both 2
-// syntaxes around the OR gate will produce the same result.
+// a function is called, the parenthesis shouldn't be applied,
+// both 2 syntaxes around the OR gate will produce the same result.
 console.log(
     "\nIs user adult ?",
     Reflect.get(user, 'is_adult') || user.is_adult
 );
 
-// Defines properties property holding functions (returning "this"
-// allows to chain function owned by user)
+// Defines 2 properties holding a function (returning "this"
+// allows to chain user-owned functions)
 Reflect.defineProperty(user, 'grow', { 
     value: function() {
         console.log("I'm getting older!");
