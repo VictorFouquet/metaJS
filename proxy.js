@@ -1,144 +1,164 @@
-// Defines properties that should be ignored when caching
-const PROPS_TO_IGNORE = ['stack', 'capacity', 'cache', 'delete', 'size'];
+  //`````````````````````````````````//
+ //     Playing with proxies !!     //
+//_________________________________//
 
-function defineCacheProperties(capacity, init) {
+
+/* 
+
+Goal --> Implement strong typing when instantiating an object
+         or setting its properties, and dynamic behaviour 
+         when performing get actions on it.
+
+Documentation found here :
+https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+Inspiration tutorial found here :
+https://www.youtube.com/watch?v=gZ4MCb2nlfQ&t=384s
+
+*/
+
+
+function handleArgvErrors(constructorName, argv, length, typeArg, callback) {
   /**
-   * Defines cache's properties.
-   * @param {capacity} number
-   * @param {init}     object
+   * Verifies that an argument list does corresponds to what a function expects.
+   * @param {constructorName} string
+   * @param {argv}            array
+   * @param {length}          number
+   * @param {typeArg}         string
+   * @param {callback}        function
    */
+  
+  // Ensures enough arguments where given
+  if (argv.length < length) {
+    
+    throw new Error(
+      `${constructorName} object needs at least ${length} coordinates`
+    )
 
-  // Defines cache's 'capacity' property
-  Reflect.defineProperty(init, 'capacity', {
-    value: capacity,
-    enumerable: false,
-    writable: true
-  });
-  // Defines cache's 'size' property
-  Reflect.defineProperty(init, 'size', {
-    value: Object.keys(init).length,
-    enumerable: false,
-    writable: true
-  });
-  // Defines cache's 'stack' property for LRU tracking
-  Reflect.defineProperty(init, 'stack', {
-    value: [],
-    enumerable: false
-  })
-  // Defines cache's 'cache' property, the function called
-  // to further define a new property into the cache.
-  Reflect.defineProperty(init, 'cache', {
-    value: function(key, val) {
-      Reflect.set(this, key, val);
-      return this;
-    },
-    enumerable: false
-  })
-  Reflect.defineProperty(init, 'delete', {
-    value: function(key) {
-      return Reflect.deleteProperty(this, key);
-    }, enumerable: false}
+  // Ensures all arguments have the right typing.
+  } else if (
+    Object.values(argv)
+    .map(callback).includes(false)
+  ) {
+
+    throw new Error(
+      `${constructorName}'s coordinates should only be of type ${typeArg}` 
+    )
+
+  }
+}
+
+
+let isPoint = function(point) {
+  /**
+   * Ensures an object is a Point object.
+   * @param {point} PointObject
+   */
+  return Reflect.get(point.constructor, 'name') == 'Point'
+}
+
+
+let Point = function(x, y) {
+  /**
+   * Creates a 2d Point object.
+   * @param {x} number
+   * @param {y} number 
+   */
+  // Callback checks if an argument actually is a number
+  let argvTypeCheckingCallback = arg => typeof arg == 'number';
+
+  // Handles arguments errors
+  try {
+    handleArgvErrors(
+      'Point', arguments, 2, 'number', argvTypeCheckingCallback
+    )
+  } catch (error) {
+    console.log(error.message);
+    return undefined;
+  }
+
+  // Defines point's coordinates.
+  Reflect.defineProperty(this, "x", { value:x, writable:true, enumerable:true });
+  Reflect.defineProperty(this, "y", { value:y, writable:true, enumerable:true });
+  
+  // Defines function to calculate euclidean distance to another point.
+  Reflect.defineProperty(
+    this,
+    'getDistance',
+    {
+      value: function(otherPoint) {
+        if (!isPoint(otherPoint)) {
+          throw new Error('distance can only be calculated between 2 points.')
+        }
+        return Math.sqrt(
+          (this.x - otherPoint.x)**2 + (this.y - otherPoint.y)**2
+        )
+      }
+    }
   )
-}
 
-function removeDoubles(target, prop) {
-  /**
-   * Prevents cache's stack to store doubles.
-   * @param {target} object
-   * @param {prop}   string
-   */
-  // Finds index of the prop to remove in stack.
-  let idx = target.stack.indexOf(prop);
-  // Removes item from stack if it's yet stored.
-  if (idx !== -1) target.stack.splice(idx, 1);
-}
-
-function updateLRUStack(target, prop) {
-  /**
-   * Keeps track of least recently used prop.
-   * @param {target} object
-   * @param {prop}   string
-   */
-  // Removes doubles from stack then pushes used prop.
-  if (target[prop]) removeDoubles(target, prop);
-  target.stack.push(prop);
-}
-
-function getHandler(target, prop) {
-  /**
-   * Handles get queries.
-   * @param {target} object
-   * @param {prop}   string
-   */
-  if (!PROPS_TO_IGNORE.includes(prop)) {
-    // Updates least recently used stack.
-    updateLRUStack(target, prop)
-  }
-  return target[prop]
-}
-
-function setHandler(target, prop, val) {
-  /**
-   * Handles set queries.
-   * @param {target} object
-   * @param {prop}   string
-   * @param {val}    integer
-   */
-  if (prop == 'capacity') {
-    // When setting capacity, delete overflowing props
-    // according to new cache's capacity.
-    target[prop] = val;
-    while (target.size >= target.capacity) {
-      delete target[target.stack.shift()]
-      target.size --;
+  // Returns a proxy to ensure a coordinate type cannot be changed.
+  return new Proxy (this, {
+    set: function(target, prop, value) {
+      if (typeof value !== 'number') {
+        throw new Error('coordinate must be of type "number"');
+      }
+      target[prop] = value;
     }
-
-  } else if (!PROPS_TO_IGNORE.includes(prop)) {
-    updateLRUStack(target, prop)
-    // Unshift prop from stack and deletes prop if cache is full.
-    if (target.size >= target.capacity && !target[prop]) {
-      delete target[target.stack.shift()];
-      target.size --;
-    }
-    // Increases cache's size and store the prop its value.
-    if (!target[prop]) target.size++;
-    target[prop] = val
-  }
+  })
 }
 
-function deleteHandler(target, prop) {
+
+let Line = function(pointA, pointB) {
   /**
-   * Handles delete queries.
-   * @param {target} object
-   * @param {prop}   string
+   * Creates a Line object.
+   * @param {pointA} PointObject
+   * @param {pointB} PointObject 
    */
-  if (!PROPS_TO_IGNORE.includes(prop)) {
-    // Removes prop from cache's stack.
-    target.stack.splice(
-      target.stack.indexOf(prop), 1
+
+  // Callback that checks if an argument actually is a point
+  let argvTypeCheckingCallback = arg => isPoint(arg)
+
+  // Handles arguments errors
+  try {
+    handleArgvErrors(
+      'Line', arguments, 2, 'Point', argvTypeCheckingCallback
     );
-    // Decreases cache's size and delete prop.
-    if (Reflect.has(target, prop)) target.size --;
-    return Reflect.deleteProperty(target, prop);
+  } catch (error) {
+    console.log(error)
+    console.log(error.message);
+    return undefined;
   }
-}
 
-function LRUCache(capacity, init) {
-  /**
-   * @param {capacity} number
-   * @param {init}     object
-   */
-  defineCacheProperties(capacity, init);
-  // Handles cache's intercation with a proxy.
-  return new Proxy(init, {
-    get: function(target, prop) { 
-      return getHandler(target, prop) 
+  // Defines line's start and end points.
+  Reflect.defineProperty(
+    this,
+    'pointA',
+    { value: pointA, writable: true }
+  )
+  Reflect.defineProperty(
+    this,
+    'pointB',
+    { value: pointB, writable: true }
+  )
+  
+ 
+  return new Proxy(this, {
+    get: function(target, prop) {
+      // Length is dynamically computed.
+      if (prop == 'length') {
+        return target.pointA.getDistance(target.pointB);
+      } else if (['pointA','pointB'].includes(prop)) {
+          return target[prop];
+      }
+      return undefined;
     },
-    set: function(target, prop, val) { 
-      return setHandler(target, prop, val) 
-    },
-    deleteProperty: function(target, prop) { 
-      return deleteHandler(target, prop)
+    set: function(target, prop, value) {
+      if (
+        ['pointA','pointB'].includes(prop) &&
+        Reflect.get(value.constructor, 'name') == 'Point'
+      ) {
+        target[prop] = value
+      }      
     }
   })
 }
