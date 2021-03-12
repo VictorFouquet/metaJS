@@ -37,7 +37,7 @@ const hasUnexpectedType = function(argument, expected) {
     const argumentType = Reflect.get(
         argument.constructor, 'name'
     );
-
+    
     // As 'typeFunction' will by default be a custom 
     // typed function's constructor name, ensures that
     // the checking is performed on the actual function name.
@@ -50,9 +50,7 @@ const hasUnexpectedType = function(argument, expected) {
 
 
 const typeHandler = function() {
-    /**
-     * Implements strong typing for a function's props.
-     */
+    /** Implements strong typing for a function's props. */
 
     // Ensures a set operation will not change the type
     // of a function's prop
@@ -72,25 +70,25 @@ const typeHandler = function() {
 
 
 const typeFunction = function() {
-    /**
-     * Makes function a typed function.
-     */
+    /** Makes function a typed function. */
 
     // Sets custom typed function's name.
     Reflect.defineProperty(this, 'functionName', 
-        { value: arguments[0]}
+        { value: arguments[0] }
     )
     delete arguments[0];
 
     // Ensures function gets correctly instantiated.
     Object.values(arguments).forEach((arg, idx) => {
-        // Checks enough arguments where given.
-        if (arg.val == undefined) throw new Error('Missing arguments')
-
-        // Ensures each argument has the expected type.
+        // For debugging purposes, stores the given argument's type.
         const constructorName = Reflect.get(
             arg.val.constructor, 'name'
         );
+
+        // Ensures enough arguments where given.
+        if (arg.val == undefined) throw new Error('Missing arguments')
+
+        // Ensures each argument has the expected type.
         if ( hasUnexpectedType(arg.val, arg.type) ) {
             throw new Error(`Wrong type for argv[${idx}] : `+
             `Expected ${arg.type}, got ${constructorName}`)
