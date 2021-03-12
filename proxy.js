@@ -16,17 +16,25 @@ https://www.youtube.com/watch?v=gZ4MCb2nlfQ&t=384s
 
 */
 
+let hasCorrectType = function(object, name) {
+  /**
+   * Ensures an object is a Point object.
+   * @param {object} object
+   * @param {name}   string
+   */
+  const constructorName = Reflect.get(object.constructor, 'name');
+  return constructorName.toLowerCase() == name.toLowerCase()
+}
 
-function handleArgvErrors(constructorName, argv, length, typeArg, callback) {
+
+function handleArgvErrors(constructorName, argv, length, typeArg) {
   /**
    * Verifies that an argument list does corresponds to what a function expects.
    * @param {constructorName} string
    * @param {argv}            array
    * @param {length}          number
    * @param {typeArg}         string
-   * @param {callback}        function
    */
-  
   // Ensures enough arguments where given
   if (argv.length < length) {
     
@@ -36,8 +44,7 @@ function handleArgvErrors(constructorName, argv, length, typeArg, callback) {
 
   // Ensures all arguments have the right typing.
   } else if (
-    Object.values(argv)
-    .map(callback).includes(false)
+    Object.values(argv).map(arg => hasCorrectType(arg, typeArg)).includes(false)
   ) {
 
     throw new Error(
@@ -48,29 +55,16 @@ function handleArgvErrors(constructorName, argv, length, typeArg, callback) {
 }
 
 
-let isPoint = function(point) {
-  /**
-   * Ensures an object is a Point object.
-   * @param {point} PointObject
-   */
-  return Reflect.get(point.constructor, 'name') == 'Point'
-}
-
-
 let Point = function(x, y) {
   /**
    * Creates a 2d Point object.
    * @param {x} number
    * @param {y} number 
    */
-  // Callback checks if an argument actually is a number
-  let argvTypeCheckingCallback = arg => typeof arg == 'number';
 
   // Handles arguments errors
   try {
-    handleArgvErrors(
-      'Point', arguments, 2, 'number', argvTypeCheckingCallback
-    )
+    handleArgvErrors('Point', arguments, 2, 'number')
   } catch (error) {
     console.log(error.message);
     return undefined;
@@ -86,7 +80,7 @@ let Point = function(x, y) {
     'getDistance',
     {
       value: function(otherPoint) {
-        if (!isPoint(otherPoint)) {
+        if (!hasCorrectType(otherPoint, 'Point')) {
           throw new Error('distance can only be calculated between 2 points.')
         }
         return Math.sqrt(
@@ -115,17 +109,11 @@ let Line = function(pointA, pointB) {
    * @param {pointB} PointObject 
    */
 
-  // Callback that checks if an argument actually is a point
-  let argvTypeCheckingCallback = arg => isPoint(arg)
-
   // Handles arguments errors
   try {
-    handleArgvErrors(
-      'Line', arguments, 2, 'Point', argvTypeCheckingCallback
-    );
+    handleArgvErrors('Line', arguments, 2, 'Point');
   } catch (error) {
     console.log(error)
-    console.log(error.message);
     return undefined;
   }
 
@@ -155,10 +143,13 @@ let Line = function(pointA, pointB) {
     set: function(target, prop, value) {
       if (
         ['pointA','pointB'].includes(prop) &&
-        Reflect.get(value.constructor, 'name') == 'Point'
+        hasCorrectType(value, 'Point')
       ) {
         target[prop] = value
       }      
     }
   })
 }
+
+let line = new Line(new Point(0,0), new Point(1,1))
+console.log(line.length)
