@@ -80,7 +80,7 @@ const typeFunction = function() {
 
     // Ensures function gets correctly instantiated.
     Object.values(arguments).forEach((arg, idx) => {
-        // For debugging purposes, stores the given argument's type.
+        // For error handling purposes, stores the given argument's type.
         const constructorName = Reflect.get(
             arg.val.constructor, 'name'
         );
@@ -159,7 +159,7 @@ const Line = function(pointA, pointB) {
     )
 
     Reflect.defineProperty(this, 'length', {
-        // Uses a setter to dynamically compute the 
+        // Uses a getter to dynamically compute the 
         // instance's length between its starting and end points.
         get: function() {
             return this.pointA.distanceTo(pointB)
