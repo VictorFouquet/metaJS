@@ -37,14 +37,14 @@ const hasUnexpectedType = function(argument, expected) {
     const argumentType = Reflect.get(
         argument.constructor, 'name'
     );
-    
+
     // As 'typeFunction' will by default be a custom 
     // typed function's constructor name, ensures that
     // the checking is performed on the actual function name.
     return (
         argumentType != expected && 
-        Reflect.has(argument, 'funcName') &&
-        Reflect.get(argument, 'funcName') != expected
+        Reflect.has(argument, 'functionName') &&
+        Reflect.get(argument, 'functionName') != expected
     )
 }
 
@@ -56,11 +56,14 @@ const typeHandler = function() {
     // of a function's prop
     return {
         set: function(target, prop, value) {
-            const thisPropType = Reflect.get(target[prop].constructor, 'name');
+            let thisPropType = Reflect.get(target[prop].constructor, 'name');
+            if (thisPropType == 'typeFunction') {
+                thisPropType = Reflect.get(target[prop], 'functionName')
+            }
             if (hasUnexpectedType(value, thisPropType)) {
                 throw new Error(
-                    `Type Error : trying to change a  [ ${thisPropType} ]`+
-                    `to a [ ${valueType} ]`
+                    `Type Error : trying to change a  [ ${thisPropType} ] `+
+                    `to a [ ${typeof value} ]`
                 )
             }
             target[prop] = value
